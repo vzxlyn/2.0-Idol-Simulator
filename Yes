@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>✨ 爱豆模拟器 | 偶像养成计划 ✨</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none; /* 提升模拟器点击感，避免选中文字 */
+        }
+
+        body {
+            background: linear-gradient(145deg, #f9e7f3 0%, #ffd9e8 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Poppins', 'SF Pro Text', system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* 主卡片 */
+        .idol-card {
+            max-width: 550px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(1px);
+            border-radius: 64px 48px 64px 48px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 215, 235, 0.6);
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        /* 顶部应援色区 */
+        .profile-header {
+            background: linear-gradient(135deg, #ff99cc, #ff66aa);
+            padding: 24px 20px 20px 20px;
+            text-align: center;
+            border-bottom: 3px solid #fff5f9;
+        }
+
+        .star-name {
+            font-size: 2.3rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: white;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            margin: 0;
+            word-break: keep-all;
+        }
+
+        .star-title {
+            background: rgba(255, 255, 255, 0.25);
+            display: inline-block;
+            backdrop-filter: blur(4px);
+            border-radius: 40px;
+            padding: 6px 18px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #fff0f5;
+            margin-top: 8px;
+        }
+
+        /* 数值仪表盘 */
+        .stats-panel {
+            padding: 20px 20px 12px 20px;
+            background: #fffef7;
+            border-bottom: 1px solid #ffe2ef;
+        }
+
+        .stat-item {
+            margin-bottom: 14px;
+        }
+
+        .stat-label {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #b15e7c;
+            margin-bottom: 6px;
+        }
+
+        .stat-bar-bg {
+            background: #f0d9e2;
+            border-radius: 30px;
+            height: 12px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .stat-fill {
+            background: linear-gradient(90deg, #ff88b0, #ff4d7a);
+            width: 0%;
+            height: 100%;
+            border-radius: 30px;
+            transition: width 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+        }
+
+        .fan-fill {
+            background: linear-gradient(90deg, #ffb347, #ff7e05);
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #d14b74;
+        }
+
+        /* 荣誉 & 等级 */
+        .rank-area {
+            display: flex;
+            justify-content: space-between;
+            background: #fff3f8;
+            padding: 12px 20px;
+            border-radius: 30px;
+            margin: 8px 20px 0px 20px;
+            font-weight: bold;
+        }
+
+        .rank-badge {
+            background: #ffd966;
+            padding: 5px 15px;
+            border-radius: 40px;
+            color: #5a3e2b;
+            font-size: 0.85rem;
+        }
+
+        .debut-badge {
+            background: #e0b0ff;
+            padding: 5px 15px;
+            border-radius: 40px;
+            color: #3a2a4a;
+        }
+
+        /* 行动按钮区 */
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding: 20px;
+        }
+
+        .action-btn {
+            background: white;
+            border: none;
+            padding: 12px 6px;
+            border-radius: 44px;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #a1456a;
+            box-shadow: 0 5px 0 #ecc0d0;
+            transition: 0.07s linear;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+
+        .action-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #ecc0d0;
+        }
+
+        .special-btn {
+            background: #ffecb3;
+            color: #c25d2e;
+            box-shadow: 0 5px 0 #f5bc70;
+        }
+
+        .reset-btn {
+            background: #ffe0e7;
+            color: #b3476b;
+            box-shadow: 0 5px 0 #d4a1b5;
+        }
+
+        /* 事件/日志区域 */
+        .event-log {
+            background: #fff3f0;
+            margin: 8px 20px 20px 20px;
+            border-radius: 40px;
+            padding: 14px 18px;
+            min-height: 100px;
+            border: 1px solid #ffe0e7;
+        }
+
+        .log-title {
+            font-weight: 800;
+            color: #ff86a8;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .log-message {
+            font-size: 0.9rem;
+            color: #7a4e62;
+            line-height: 1.35;
+            word-break: break-word;
+            background: #ffffffbb;
+            border-radius: 30px;
+            padding: 8px 12px;
+            min-height: 65px;
+            font-weight: 500;
+        }
+
+        /* 出道特殊样式 */
+        .debut-glow {
+            animation: glowPulse 0.5s ease-in-out 3;
+        }
+
+        @keyframes glowPulse {
+            0% { text-shadow: 0 0 0px gold; box-shadow: 0 0 0px gold; }
+            100% { text-shadow: 0 0 8px #ffd966; box-shadow: 0 0 12px #ffc107; }
+        }
+
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 12px;
+            color: #cf9bb0;
+            background: #fff0f5;
+        }
+    </style>
+</head>
+<body>
+<div class="idol-card" id="idolApp">
+    <div class="profile-header">
+        <div class="star-name">✨ 我的爱豆 ✨</div>
+        <div class="star-title" id="stageNameTxt">🌸 练习生 · 冉冉新星 🌸</div>
+    </div>
+
+    <div class="stats-panel">
+        <div class="stat-item">
+            <div class="stat-label"><span>🎤 唱功 Vocal</span><span id="vocalVal" class="stat-value">30</span></div>
+            <div class="stat-bar-bg"><div class="stat-fill" id="vocalFill" style="width: 30%"></div></div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label"><span>💃 舞蹈 Dance</span><span id="danceVal" class="stat-value">30</span></div>
+            <div class="stat-bar-bg"><div class="stat-fill" id="danceFill" style="width: 30%"></div></div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label"><span>🎭 魅力 Charisma</span><span id="charismaVal" class="stat-value">30</span></div>
+            <div class="stat-bar-bg"><div class="stat-fill" id="charismaFill" style="width: 30%"></div></div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-label"><span>❤️ 粉丝数 (万)</span><span id="fanVal" class="stat-value">5</span></div>
+            <div class="stat-bar-bg"><div class="stat-fill fan-fill" id="fanFill" style="width: 5%"></div></div>
+        </div>
+    </div>
+
+    <div class="rank-area">
+        <span>🏆 爱豆等级</span>
+        <span class="rank-badge" id="rankLabel">🌱 练习生</span>
+        <span>🎉 出道状态</span>
+        <span class="debut-badge" id="debutLabel">❌ 未出道</span>
+    </div>
+
+    <div class="action-grid">
+        <button class="action-btn" data-action="vocal">🎤 声乐集训</button>
+        <button class="action-btn" data-action="dance">💃 舞蹈特训</button>
+        <button class="action-btn" data-action="charisma">✨ 形象管理</button>
+        <button class="action-btn" data-action="fanmeet">📸 粉丝互动</button>
+        <button class="action-btn special-btn" data-action="debut">🌟 出道 Showcase 🌟</button>
+        <button class="action-btn reset-btn" data-action="reset">🔄 重启星途</button>
+    </div>
+
+    <div class="event-log">
+        <div class="log-title">📣 经纪人播报</div>
+        <div class="log-message" id="logMsg">点击上方按钮，培养你的专属爱豆！✨</div>
+    </div>
+    <footer>⭐ 每项训练提升能力 & 小幅度涨粉 | 满足出道条件后点击【出道】成为巨星！</footer>
+</div>
+
+<script>
+    // ---------- 爱豆状态 ----------
+    let idol = {
+        vocal: 30,
+        dance: 30,
+        charisma: 30,
+        fans: 5,      // 单位 万
+        debuted: false
+    };
+
+    // 上限设定 100 (粉丝理论上限200w 但UI用百分比200%)
+    const MAX_STAT = 100;
+    const MAX_FANS = 200;   // 200万粉丝展示上限
+
+    // DOM 元素
+    const vocalVal = document.getElementById('vocalVal');
+    const danceVal = document.getElementById('danceVal');
+    const charismaVal = document.getElementById('charismaVal');
+    const fanVal = document.getElementById('fanVal');
+    const vocalFill = document.getElementById('vocalFill');
+    const danceFill = document.getElementById('danceFill');
+    const charismaFill = document.getElementById('charismaFill');
+    const fanFill = document.getElementById('fanFill');
+    const rankLabel = document.getElementById('rankLabel');
+    const debutLabel = document.getElementById('debutLabel');
+    const stageNameTxt = document.getElementById('stageNameTxt');
+    const logMsgDiv = document.getElementById('logMsg');
+
+    // 辅助函数: 更新UI (数值、进度条、称号)
+    function updateUI() {
+        // 数值显示与进度条 width %
+        let vocalPercent = (idol.vocal / MAX_STAT) * 100;
+        let dancePercent = (idol.dance / MAX_STAT) * 100;
+        let charismaPercent = (idol.charisma / MAX_STAT) * 100;
+        let fanPercent = (idol.fans / MAX_FANS) * 100;
+        vocalFill.style.width = `${Math.min(100, vocalPercent)}%`;
+        danceFill.style.width = `${Math.min(100, dancePercent)}%`;
+        charismaFill.style.width = `${Math.min(100, charismaPercent)}%`;
+        fanFill.style.width = `${Math.min(100, fanPercent)}%`;
+        
+        vocalVal.innerText = Math.floor(idol.vocal);
+        danceVal.innerText = Math.floor(idol.dance);
+        charismaVal.innerText = Math.floor(idol.charisma);
+        fanVal.innerText = Math.floor(idol.fans);
+        
+        // 动态称号系统
+        let avgStat = (idol.vocal + idol.dance + idol.charisma) / 3;
+        let rank = "";
+        if (idol.debuted) {
+            if (avgStat >= 85 && idol.fans >= 150) rank = "👑 顶流巨星 👑";
+            else if (avgStat >= 70 && idol.fans >= 80) rank = "💎 人气TOP 💎";
+            else if (avgStat >= 55) rank = "⭐ 当红爱豆 ⭐";
+            else rank = "✨ 新人爱豆 ✨";
+        } else {
+            if (avgStat >= 70) rank = "🔥 全能练习生 🔥";
+            else if (avgStat >= 50) rank = "💪 潜力练习生 💪";
+            else rank = "🌱 练习生";
+        }
+        // 出道特殊前缀
+        if (idol.debuted) rank = "🎤 " + rank;
+        rankLabel.innerText = rank;
+        
+        // 出道状态文字 & 头衔修饰
+        if (idol.debuted) {
+            debutLabel.innerText = "✅ 已出道";
+            debutLabel.style.background = "#c3e6cb";
+            debutLabel.style.color = "#2b5e2b";
+            stageNameTxt.innerHTML = "🏆 闪耀爱豆 · 星途璀璨 🏆";
+        } else {
+            debutLabel.innerText = "❌ 未出道";
+            debutLabel.style.background = "#e0b0ff";
+            debutLabel.style.color = "#3a2a4a";
+            stageNameTxt.innerHTML = "🌸 练习生 · 冉冉新星 🌸";
+        }
+    }
+
+    // 添加随机浮动日志 + 微调数值边界
+    function addLog(message, isError = false) {
+        logMsgDiv.innerHTML = message;
+        // 可选小动画闪烁
+        logMsgDiv.style.transition = "0.1s";
+        logMsgDiv.style.opacity = "0.95";
+        setTimeout(() => { logMsgDiv.style.opacity = "1"; }, 50);
+        // 如果是错误或警告轻震动感（非物理震动）
+        if(isError){
+            logMsgDiv.style.backgroundColor = "#ffe0e0";
+            setTimeout(()=>{ logMsgDiv.style.backgroundColor = "#ffffffbb"; }, 300);
+        } else {
+            logMsgDiv.style.backgroundColor = "#ffffffbb";
+        }
+    }
+
+    // 范围限制
+    function clampStats() {
+        idol.vocal = Math.min(MAX_STAT, Math.max(0, idol.vocal));
+        idol.dance = Math.min(MAX_STAT, Math.max(0, idol.dance));
+        idol.charisma = Math.min(MAX_STAT, Math.max(0, idol.charisma));
+        idol.fans = Math.min(MAX_FANS, Math.max(0, idol.fans));
+        if(idol.fans < 0) idol.fans = 0;
+    }
+
+    // 增加属性的通用方法 (每次行动附带随机小惊喜)
+    function train(statName, baseInc, fanIncBase, msgTemplate) {
+        if(idol.debuted) {
+            addLog("🎉 你已经是出道爱豆了！但依然可以继续训练来巩固人气！🎉");
+            // 出道后训练效果微削弱但依然有效
+            baseInc = Math.floor(baseInc * 0.9);
+        }
+        let incAmount = baseInc + Math.floor(Math.random() * 4);  // 额外波动 0~3
+        let fanRise = fanIncBase + Math.floor(Math.random() * 3);
+        
+        if(statName === 'vocal') {
+            idol.vocal += incAmount;
+        } else if(statName === 'dance') {
+            idol.dance += incAmount;
+        } else if(statName === 'charisma') {
+            idol.charisma += incAmount;
+        }
+        
+        idol.fans += fanRise;
+        clampStats();
+        
+        let finalInc = incAmount;
+        let finalFanInc = fanRise;
+        let message = msgTemplate.replace('{inc}', finalInc).replace('{fan}', finalFanInc);
+        // 随机增加额外事件
+        let extra = "";
+        let rand = Math.random();
+        if(rand < 0.2 && !idol.debuted) {
+            extra = " 🌟 路演视频爆红！额外 +2 魅力！";
+            idol.charisma += 2;
+            clampStats();
+        } else if(rand < 0.15 && idol.fans > 30) {
+            extra = " 💌 粉丝自制应援视频出圈，粉丝数额外 +3万";
+            idol.fans += 3;
+            clampStats();
+        } else if(rand < 0.1 && idol.vocal > 70) {
+            extra = " 🎵 高音片段被前辈转发，唱功信心大增 +2！";
+            idol.vocal += 2;
+            clampStats();
+        }
+        addLog(message + extra);
+        updateUI();
+        // 出道后额外提醒
+        if(!idol.debuted && checkAutoDebutReady()) {
+            addLog("✨ 条件已满足！点击「出道 Showcase」正式成为偶像吧 ✨");
+        }
+    }
+    
+    // 粉丝互动专用
+    function fanMeeting() {
+        if(idol.debuted) {
+            let fanUp = 8 + Math.floor(Math.random() * 10);
+            idol.fans += fanUp;
+            let charmUp = Math.floor(Math.random() * 3);
+            idol.charisma = Math.min(MAX_STAT, idol.charisma + charmUp);
+            clampStats();
+            addLog(`💖 出道后粉丝见面会大成功！粉丝 +${fanUp}万，魅力 +${charmUp}！ 人气持续飙升 💖`);
+            updateUI();
+            return;
+        }
+        // 未出道粉丝互动: 粉丝增加，低概率增加魅力
+        let incFans = 4 + Math.floor(Math.random() * 8);
+        let charmBonus = Math.random() < 0.3 ? 1 : 0;
+        idol.fans += incFans;
+        if(charmBonus) idol.charisma = Math.min(MAX_STAT, idol.charisma + charmBonus);
+        clampStats();
+        let msg = `📸 举办了小型粉丝签售会！粉丝 +${incFans}万。`;
+        if(charmBonus) msg += ` 你的温柔吸粉，魅力 +${charmBonus}✨`;
+        else msg += ` 粉丝们都很喜欢你，继续努力吧~`;
+        addLog(msg);
+        updateUI();
+        if(!idol.debuted && checkAutoDebutReady()) {
+            addLog("✨ 人气与实力兼备！快去点击【出道 Showcase】✨");
+        }
+    }
+    
+    // 检查是否可以出道，但不自动出道，只提示
+    function checkAutoDebutReady() {
+        if(idol.debuted) return false;
+        // 出道条件: 三项均 >= 55 且 粉丝 >= 30 万
+        let cond = (idol.vocal >= 55 && idol.dance >= 55 && idol.charisma >= 55 && idol.fans >= 30);
+        return cond;
+    }
+    
+    // 出道行动
+    function debutAttempt() {
+        if(idol.debuted) {
+            addLog("已经是巨星了！举办回归秀吧！(继续训练或粉丝互动维持顶流地位)");
+            // 回归奖励少量粉丝
+            let rewardFan = 5 + Math.floor(Math.random() * 8);
+            idol.fans = Math.min(MAX_FANS, idol.fans + rewardFan);
+            addLog(`🎤 回归舞台好评如潮！粉丝 +${rewardFan}万 🎤`);
+            updateUI();
+            return;
+        }
+        // 未出道检验条件
+        let canDebut = (idol.vocal >= 55 && idol.dance >= 55 && idol.charisma >= 55 && idol.fans >= 30);
+        if(!canDebut) {
+            let need = [];
+            if(idol.vocal < 55) need.push(`唱功 ${idol.vocal}/55`);
+            if(idol.dance < 55) need.push(`舞蹈 ${idol.dance}/55`);
+            if(idol.charisma < 55) need.push(`魅力 ${idol.charisma}/55`);
+            if(idol.fans < 30) need.push(`粉丝数 ${idol.fans}/30万`);
+            addLog(`❌ 出道失败！还需要提升: ${need.join(', ')}。继续努力练习吧！`, true);
+            return;
+        }
+        // 出道成功！
+        idol.debuted = true;
+        // 出道加成: 全属性+5, 粉丝+20万 狂欢
+        idol.vocal = Math.min(MAX_STAT, idol.vocal + 5);
+        idol.dance = Math.min(MAX_STAT, idol.dance + 5);
+        idol.charisma = Math.min(MAX_STAT, idol.charisma + 5);
+        idol.fans = Math.min(MAX_FANS, idol.fans + 20);
+        clampStats();
+        
+        // 华丽特效感 (加临时样式)
+        const card = document.querySelector('.idol-card');
+        card.classList.add('debut-glow');
+        setTimeout(() => card.classList.remove('debut-glow'), 800);
+        
+        addLog("🎉🎉🎉 恭喜！出道Showcase大获成功！成为万众瞩目的偶像！粉丝暴涨20w，全属性+5！🎉🎉🎉");
+        updateUI();
+    }
+    
+    // 重置游戏
+    function resetGame() {
+        idol = {
+            vocal: 30,
+            dance: 30,
+            charisma: 30,
+            fans: 5,
+            debuted: false
+        };
+        clampStats();
+        updateUI();
+        addLog("⭐ 星途重启！一切归零，重新培养你的爱豆吧 ⭐");
+        // 额外清除闪烁样式
+        const card = document.querySelector('.idol-card');
+        card.classList.remove('debut-glow');
+    }
+    
+    // 根据按钮事件派发
+    function handleAction(action) {
+        switch(action) {
+            case 'vocal':
+                train('vocal', 5, 1, "🎵 声乐集训完成！唱功 +{inc}，粉丝 +{fan}万 🎵");
+                break;
+            case 'dance':
+                train('dance', 5, 1, "💃 高强度舞蹈练习！舞蹈 +{inc}，粉丝 +{fan}万 💃");
+                break;
+            case 'charisma':
+                train('charisma', 4, 1, "✨ 画报拍摄 + 时尚造型，魅力 +{inc}，粉丝 +{fan}万 ✨");
+                break;
+            case 'fanmeet':
+                fanMeeting();
+                break;
+            case 'debut':
+                debutAttempt();
+                break;
+            case 'reset':
+                resetGame();
+                break;
+            default:
+                break;
+        }
+        // 每次行动后自动检查动态上限额外彩蛋 (例如全满贯)
+        if(idol.vocal >= MAX_STAT && idol.dance >= MAX_STAT && idol.charisma >= MAX_STAT && idol.fans >= MAX_FANS && idol.debuted) {
+            addLog("🏅🏅🏅 传奇殿堂！你是KPOP历史级爱豆！全体起立致敬 🏅🏅🏅");
+        } else if(idol.vocal >= MAX_STAT && idol.dance >= MAX_STAT && idol.charisma >= MAX_STAT && !idol.debuted) {
+            addLog("🔥 你已经是练习生之神！快出道震撼世界吧！🔥");
+        }
+    }
+    
+    // 绑定按钮事件
+    function bindEvents() {
+        const btns = document.querySelectorAll('.action-btn');
+        btns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const action = btn.getAttribute('data-action');
+                if(action) handleAction(action);
+            });
+        });
+    }
+    
+    // 初始渲染
+    function init() {
+        bindEvents();
+        updateUI();
+        addLog("🎤 欢迎来到爱豆模拟器！从练习生做起，训练、涨粉、达成出道条件！🎤");
+    }
+    
+    init();
+</script>
+</body>
+</html>
